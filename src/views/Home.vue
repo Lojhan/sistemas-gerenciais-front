@@ -1,5 +1,10 @@
 <template>
   <div class="container mt-5">
+      <modal name="example" :key="key"
+         @before-open="beforeOpen"
+         @before-close="beforeClose">
+        <span>Hello, {{ store }}!</span>
+      </modal>
     <h1 class="display-4 mb-5">Olá, {{ store.username }}</h1>
       <Button v-if="isAdm()" label="Adicionar entrada" icon="pi pi-plus" @click="openModal" />
       <DataTable class="my-5" :value="products" :expandedRows.sync="expandedRows">
@@ -56,11 +61,12 @@
   </div>
 </template>
 
-<script lang="ts">
+<script>
 import requests from '@/plugins/requests'
 import Vue from 'vue'
 import Swal from 'sweetalert2'
 import { LogType } from '@/plugins/log.type.enum'
+import MoreData from "@/components/moreData.vue"
 
 // Raulin comentou aqui
 
@@ -68,7 +74,8 @@ export default Vue.extend({
   name: 'Home',
   data() { 
     return {
-      
+      key: 0,
+      accepted: 0,
       displayModal: false,
       store: this.$store.getters,
       products: [],
@@ -76,6 +83,8 @@ export default Vue.extend({
       stocks: [],
       rawStocks: [],
       rawProducts: [],
+      keys: [''],
+      values: [''],
       product: {
         productUuid: '',
         stockUuid: '',
@@ -85,6 +94,31 @@ export default Vue.extend({
     }
   },
   methods: {
+    updateMoreData(value, where, index){
+      this[where][index] = value
+    },
+    showModal () {
+      this.$modal.show(  
+        MoreData,
+        { 
+          keys: this.keys, 
+          values: this.values, 
+          addKey: this.addKey, 
+          removeKey: this.removeKey, 
+          updateData: this.updateMoreData 
+        },
+        { draggable: true, height: 'auto', clickToClose: false }
+      )
+    },
+    addKey() {
+      this.keys.push('')
+      this.values.push('')
+    },
+    removeKey(index) {
+      this.keys.splice(index, 1)
+      
+      this.values.splice(index, 1)
+    },
     openModal() {
             this.displayModal = true;
     },
@@ -106,7 +140,7 @@ export default Vue.extend({
       const { data } = await requests.productsRaw()
       this.rawProducts = data
     },
-    async validate(product: { stock: { uuid: string }; product: { uuid: string } }) {
+    async validate(product) {
       if (!this.isAdm()) return;
 
       Swal.fire({
@@ -141,13 +175,23 @@ export default Vue.extend({
         }
       })
     },
-    async transfer(data: any) {
+    beforeOpen (event) {
+      console.log('Opening...')
+    },
+    beforeClose (event) {
+      console.log(event)
+      // What a gamble... 50% chance to cancel closing
+      if (Math.random() < 0.5) {
+        event.cancel()
+      }
+    },
+    async transfer(data) {
       const stocks = Object.entries(this.stocks).length === 0 ? (await requests.stocks()).data : this.stocks
       this.stocks = stocks
       
-      let stocksObj: any = {}
+      let stocksObj = {}
 
-      stocks.forEach((stock: any) => {
+      stocks.forEach((stock) => {
         stocksObj[stock.uuid] = stock.name
       });
 
@@ -180,13 +224,14 @@ export default Vue.extend({
           
           showCancelButton: true,
           inputValidator: result => {
-            if (isNaN(+result)) return 'O valor precisa ser um número' as string
+            if (isNaN(+result)) return 'O valor precisa ser um número'
               else return null 
           }
         }
-      ]).then(async (result: any) => {
+      ])
+
+      .then(async (result) => {
         if (result.value) {
-          console.log(result.value[1], Number(result.value[0]))
           try {
           await requests.transferStorage(
             data.product.uuid, 
@@ -194,8 +239,9 @@ export default Vue.extend({
             result.value[1], 
             Number(result.value[0]), 
             Number(result.value[2])
-          )
-           this.getProducts()
+          ).then(() => {
+            this.getProducts()
+          })
             Swal.fire({
               title: 'Sucesso!',
               text: 'Item verificado',
@@ -213,7 +259,7 @@ export default Vue.extend({
         }
       })
     },
-    changeQuantity(data: any) {
+    changeQuantity(data) {
 
       Swal.mixin({
         input: 'text',
@@ -229,7 +275,7 @@ export default Vue.extend({
           inputValue: data.quantity,
           showCancelButton: true,
           inputValidator: result => {
-            if (isNaN(+result)) return 'O valor precisa ser um número' as string
+            if (isNaN(+result)) return 'O valor precisa ser um número'
               else return null 
           }
             
@@ -247,19 +293,53 @@ export default Vue.extend({
           
           showCancelButton: true,
           inputValidator: result => {
-            if (isNaN(+result)) return 'O valor precisa ser um número' as string
+            if (isNaN(+result)) return 'O valor precisa ser um número'
               else return null 
           }
         }
-      ]).then(async (result: any) => {
+      ])
+      .then(async (result) => {
+        const data = await new Promise((resolve, reject) => {
+           console.log('teste')
+              this.$modal.show(  
+              MoreData,
+              { 
+                keys: this.keys, 
+                values: this.values, 
+                addKey: this.addKey, 
+                removeKey: this.removeKey, 
+                updateData: this.updateMoreData 
+              },
+              { draggable: true, height: 'auto', clickToClose: false },
+              { 'before-close': event => { resolve(event) } }
+            )
+        })
+        console.log('a')
+        result.aditional = { keys: this.keys, values: this.values}
+        this.keys = ['']
+        this.values = ['']
+        this.key = this.key + 1
+        return result
+      })
+      .then(async (result) => {
+        console.log(result.aditional.keys)
+          let obj = {};
+          
+          result.aditional.keys.forEach((key, index) => {
+            obj[key] = result.aditional.values[index]
+          })
+          
+          console.log(obj);
         if (result.value) {
+        
           try {
           await requests.changeQuantityFromStorage(
             data.stock.uuid, 
             data.product.uuid, 
             Number(result.value[0]), 
             result.value[1], 
-            Number(result.value[2])
+            Number(result.value[2]),
+            obj
           )
            this.getProducts()
             Swal.fire({
@@ -280,7 +360,7 @@ export default Vue.extend({
       })
 
     },
-    updateData(data: any) {
+    updateData(data) {
 
       Swal.mixin({
         input: 'text',
@@ -296,7 +376,7 @@ export default Vue.extend({
           inputValue: data.quantity,
           showCancelButton: true,
           inputValidator: result => {
-            if (isNaN(+result)) return 'O valor precisa ser um número' as string
+            if (isNaN(+result)) return 'O valor precisa ser um número'
               else return null 
           }
             
@@ -309,11 +389,11 @@ export default Vue.extend({
           
           showCancelButton: true,
           inputValidator: result => {
-            if (isNaN(+result)) return 'O valor precisa ser um número' as string
+            if (isNaN(+result)) return 'O valor precisa ser um número'
               else return null 
           }
         }
-      ]).then(async (result: any) => {
+      ]).then(async (result) => {
         if (result.value) {
           try {
           await requests.updateStorageData(

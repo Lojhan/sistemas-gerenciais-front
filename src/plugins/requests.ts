@@ -63,13 +63,15 @@ export default {
         product_uuid: string, 
         delta: number, 
         reason: string,
-        unity_price: number
+        unity_price: number,
+        aditional_data: any
     ) => axios.post('products/storage/change_quantity', {
         product_uuid, 
         stock_uuid, 
         delta, 
         reason,
-        unity_price
+        unity_price,
+        aditional_data
         }
     ),
 

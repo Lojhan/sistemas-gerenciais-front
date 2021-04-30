@@ -10,6 +10,7 @@ import Dialog from 'primevue/dialog'
 import InputNumber from 'primevue/inputnumber'
 import Calendar from 'primevue/calendar';
 import InputText from 'primevue/inputtext';
+import VModal from "vue-js-modal";
 
 import Dropdown from 'primevue/dropdown';
 
@@ -21,7 +22,12 @@ import 'primevue/resources/primevue.min.css'
 import 'primeicons/primeicons.css'
 import 'primevue/resources/themes/bootstrap4-light-blue/theme.css'
 
+import "vue-js-modal/dist/styles.css";
+
 Vue.config.productionTip = false
+
+
+Vue.use(VModal, { componentName: "modal" });
 
 Vue.component('DataTable', DataTable)
 Vue.component('Column', Column)
