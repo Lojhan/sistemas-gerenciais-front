@@ -1,5 +1,5 @@
 import { AuthCredentialsDto } from '@/classes/auth-credentials.dto'
-import axios from './axios'
+import { axiosInstance as axios, axiosVending } from './axios'
 import { TOKEN } from './constants'
 
 export default {
@@ -83,4 +83,6 @@ export default {
         stock_uuid, 
         }
     ),
+
+    getAllSalesforUser: () => axiosVending.get('sales')
 }

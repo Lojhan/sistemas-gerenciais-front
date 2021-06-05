@@ -3,7 +3,7 @@ import requests from '@/plugins/requests';
 import Vue from 'vue'
 import Vuex from 'vuex'
 import router from "@/router/index"
-import axios from '@/plugins/axios';
+import { axiosInstance as axios, axiosVending } from '@/plugins/axios';
 import { TOKEN } from '@/plugins/constants';
 
 Vue.use(Vuex)
@@ -39,6 +39,7 @@ export default new Vuex.Store({
       localStorage.setItem('type', state.user.type);
       router.push('/');
       axios.defaults.headers['Authorization'] = 'Bearer ' + TOKEN
+      axiosVending.defaults.headers['Authorization'] = 'Bearer ' + TOKEN
     } catch (error) {
       state.logging = 'error';
     }
