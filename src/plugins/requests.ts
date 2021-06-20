@@ -1,5 +1,5 @@
 import { AuthCredentialsDto } from '@/classes/auth-credentials.dto'
-import { axiosInstance as axios, axiosVending } from './axios'
+import { axiosInstance as axios, axiosPayment, axiosVending } from './axios'
 import { TOKEN } from './constants'
 
 export default {
@@ -10,6 +10,8 @@ export default {
     products: () => axios.get('products'),
 
     productsRaw: () => axios.get('products/raw'),
+
+    toReceive: () => axiosPayment.get('payment-ticket'),
 
     logs: () => axios.get('logs'),
     

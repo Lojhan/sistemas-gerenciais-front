@@ -43,6 +43,7 @@ export default Vue.extend({
             items: [
                 { name: 'Produtos', link: '/products', type: 'item', roles: ['adm', 'user'] },
                 { name: 'Estoques', link: '/stocks', type: 'item', roles: ['adm', 'user'] },
+                { name: 'Contas a receber', link: '/to-receive', type: 'item', roles: ['adm', 'user'] },
                 { name: 'Logs', link: '', type: 'menu', roles: ['adm', 'user'], children: [
                         { name: 'Compra/ Venda', link: '/market-logs', type: 'item', roles: ['adm', 'user'] },
                         { name: 'Geral', link: '/logs', type: 'item', roles: ['adm'] },

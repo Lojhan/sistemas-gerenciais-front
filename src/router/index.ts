@@ -46,6 +46,11 @@ const routes: Array<RouteConfig> = [
     beforeEnter: commonGuard
   },
   {
+    path: '/to-receive',
+    name: 'ToReceive',
+    component: () => import('../views/ToReceive.vue'),
+  },
+  {
     path: '/stocks',
     name: 'Stocks',
     component: () => import('../views/Storages.vue'),

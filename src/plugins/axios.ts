@@ -7,3 +7,7 @@ export const axiosInstance = axios.create({
 export const axiosVending = axios.create({
     baseURL: 'http://localhost:3001'
 })
+
+export const axiosPayment = axios.create({
+    baseURL: 'http://localhost:3002'
+})
